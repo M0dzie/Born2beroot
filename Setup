@@ -1,0 +1,39 @@
+VIRTUAL BOX
+	- ddl Debian amd64 en .iso
+	- lancer VirtualBox
+	- setup RAM 4096, stockage 30.8 GB
+
+INIT VM
+	- install / US / Fr / Keymap US EN
+	- hostname : login42 + 42 [mdp root = F********1]
+	- user account : Nom et prenom
+	- username : prenom em min [mdp user = B*******!]
+
+PARTITIONNING DISK (MANUAL)
+	- Manual pour les Bonus, sinon guided LVM
+	- SCIS2 -> pri/log -> 500MB -> primary -> beginning -> mount = /boot -> bootable = on
+	- create encrypted -> sda free
+	- Logical Volume Manager -> sda5 crypted -> create Group "LVMGroup" -> create logical volume
+			- home : "home" -> 5.4GB
+			- root : "root" -> 10.7GB
+			- srv : "srv" -> 3.2GB
+			- swap : "swap" -> 2.5GB
+			- tmp : "tmp" -> 3.2GB
+			- var : "var" -> 3.2GB
+			- var-log : "var-log" -> 4.3GB
+	- finish LVM et retour a la partition
+	- cliquer sur les espaces en dessous des LVM
+			- home : Ext4 -> mount = /home
+			- root : Ext4 -> mount = / - root
+			- srv : Ext4 -> mount = /srv
+			- swap : swap
+			- tmp : Ext4 -> mount = /tmp
+			- var : Ext4 -> mount = /var
+			- var-log : Ext4 -> mount = manual "/var/log"
+
+LAUNCH INSTALL
+	- package manager ? no 
+	- France ? Debian.org ? Ok sans mdp
+	- Survey ?  No
+	- Software = tout decocher
+	- install GRUB -> dev/sda
