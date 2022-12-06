@@ -1,0 +1,107 @@
+# Pre install
+1. Hostname `user42` where `user` is your username
+2. No host
+| type | name    | mount    | size   | encrypted |
+| ---- | ------- | -------- | ------ | --------- |
+| ext4 | home    | /home    | 5.4GB  | y         |
+| ext4 | root    | /        | 10.7GB | y         |
+| ext4 | srv     | /srv     | 3.2GB  | y         |
+| ext4 | tmp     | /tmp     | 3.2GB  | y         |
+| ext4 | var     | /var     | 3.2GB  | y         |
+| ext4 | var-log | /var/log | 4.3G   | y         |
+| SWAP | swap    | X        | 2.5GB  | n         |
+| ext4 | boot    | /boot    | 525M   | n         |
+# Post install
+
+Note:
+- when `user` is being used, it refers to your username
+- `pkg` refers to package(s)
+## Setup sudo
+1. Switch the user to root `su -` (the param `-` will login to root by default)
+2. Check for any update / upgrades (shouldn't be any): `apt update` & `apt upgrade`
+3. Install the following packages `apt install openssh-server ufw libpam-pwquality sudo` *(`vim`)*
+	- SSH (`openssh-server`)
+	- Uncomplicated firewall (`ufw`)
+	- Password quality checker (`libpam-pwquality`)
+	- SuDo (`sudo`)
+	- *Optionally vim (`vim`)*
+4. *You can change the default editor to vim* `sudo update-alternatives --config editor`
+5. Add yourself in the sudo group `usermod -aG sudo user`
+	- `-a` add the user to the **group**(s). Use only with the **-G** option. 
+	- `-G` list of groups to add to the user (separate groups with commas, not whitespaces)
+6. Check the group has been set with `groups user` or `getent group sudo`
+7. Open the sudoers file with `visudo`
+8. Create this line right under the root version of it   `user    ALL=(ALL:ALL) ALL`
+9. You should now have access to `sudo`
+10. Exit the previous `su -` by typing `exit` or pressing `CTRL+D`
+11. Now try your sudo privileges with `sudo echo lol`
+## Install SSH and setup
+1. Go to `/etc/ssh/sshd_config`
+2. Change `#Port 22` to `Port 4242`
+3. Enable ufw: `ufw enable`
+4. Allow the port 4242 `ufw allow 4242`
+5. Check it `ufw status (numbered)`
+6. Restart ssh and check its status and port `service sshd restart` & `service sshd status`
+7. Portforward 4242 on the VM:
+	1. Open the VM settings
+	2. Go to `Network`
+	3. Click on `Advanced`
+	4. Click on `Port Forwarding`
+	5. Create a new rule
+	6. Set the `Host Port` and `Guest Port` to `4242`
+8. Try to connect on a terminal outside the VM with `ssh user@127.0.0.1 -p 4242`
+## Password setup
+### Password quality check
+You need the `libpam-pwquality` package
+Enter the password quality config file `sudoedit /etc/pam.d/common-password`  and add the following at the end of the line `requisite  pam_pwquality.so`
+1. `difok=7` number of character changes in the new password that differentiate it from the old password
+2. `minlen=10` minimum acceptable size for the new password (plus one if credits are not disabled which is the default)
+3. `dcredit=-1` credit for having at least one digits in the new password
+4. `ucredit=-1` credit for having at least one upper case in the new password
+5. `lcredit=-1` credit for having at least one lower case in the new password
+6. `maxrepeat=3` reject passwords which contain more than 3 same consecutive characters
+7. `reject_username` reject password if it contains the username in straight or reversed form
+8. `enforce_for_root` apply those rules to root too
+Should get something like `difok=7 minlen=10 dcredit=-1 ucredit=-1 lcredit=-1 maxrepeat=3 reject_username enforce_for_root`
+### Password expiration
+1. Go into the password expiration config file `sudoedit /etc/login.defs`
+2. Set the old values to: 
+	- `PASS_MAX_DAYS   30`
+	- `PASS_MIN_DAYS   2`
+	- `PASS_WARN_AGE   7`
+At the end of this, you should reboot to ensure that everything is up to date with your config files
+## Group and user setup
+### user42 group
+ 1. Create a new group
+    `sudo groupadd user42`
+ 2. Add the `user42` to `user`
+     `sudo usermod -aG user42 user`
+ 3. Check your groups with `groups` or `groups user`
+### evaluating user setup
+1. Create a new user `sudo useradd -m test` (`-m` creates the home directory)
+2. Add it to the group `sudo usermod -aG user42 test`
+3. Add a password to the user `sudo passwd test`
+4. Check if the password rules apply `sudo chage -l test`
+5. Connect to the account by disconnecting the SSH and reconnecting
+## Strong config for sudo 
+1. Go to the sudo config `sudo visudo`
+2. sudo is limited to 3 authentications attempts by default
+3. To set up the custom error message add a line following the `Defaults`
+   `Defaults badpass_message="the custom msg goes here"` if you fail to enter the correct password you will get your custom error message
+4. If the sudo folder does not exist, create it `mkdir /var/log/sudo`
+5. To log both inputs and outputs to `/var/log/sudo/sudo.log`  use
+   `Defaults        log_input, log_output, logfile="/var/log/sudo/sudo.log"`
+6. Enabling the TTY mode will [prevent non login session](https://bobcares.com/blog/sudo-sorry-you-must-have-a-tty-to-run-sudo/) (*cron, shell, perl, python, bin scripts etc.*) to run sudo
+   `Defaults        requiretty` 
+7. Set the paths that can be used by `sudo`
+   `Defaults   secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin"`
+## Monitoring script
+1. Create a script ![[monitoring.sh]]
+2. Create a cronjob `sudo crontab -eu sudo`
+3. Add the line to run every 10 minutes `*/10 * * * * /home/user/monitoring.sh`
+
+
+# Defence
+- `hostnamectl` and `hostnamectl set-hostname`
+- `sudoedit /etc/hosts`
+- create a new user `useradd` or `adduser` (simpler and guided user creation)
