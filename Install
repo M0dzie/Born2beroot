@@ -1,18 +1,3 @@
-# Pre install
-1. Hostname `user42` where `user` is your username
-2. No host
-| type | name    | mount    | size   | encrypted |
-| ---- | ------- | -------- | ------ | --------- |
-| ext4 | home    | /home    | 5.4GB  | y         |
-| ext4 | root    | /        | 10.7GB | y         |
-| ext4 | srv     | /srv     | 3.2GB  | y         |
-| ext4 | tmp     | /tmp     | 3.2GB  | y         |
-| ext4 | var     | /var     | 3.2GB  | y         |
-| ext4 | var-log | /var/log | 4.3G   | y         |
-| SWAP | swap    | X        | 2.5GB  | n         |
-| ext4 | boot    | /boot    | 525M   | n         |
-# Post install
-
 Note:
 - when `user` is being used, it refers to your username
 - `pkg` refers to package(s)
