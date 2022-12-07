@@ -23,11 +23,11 @@ disk_use=$(df -Bm | grep "^/dev" | grep -v "/boot" | cut -d 'M' -f3 | awk '{resu
 disk_total=$(df -Bg | grep "^/dev" | grep -v "/boot" | cut -d 'G' -f2 | awk '{result += $2} END {print result}')
 disk_prcnt=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} {total += $2} END {printf("%d%%", use/total*100)}')
 
-cpu_load=$
+cpu_load=$(top -bn1 | grep "^%Cpu" | awk '{printf("%.1f%%", $2+$4)}')
 
-last_boot=$
+last_boot=$(who -b | awk '{print $3,$4}')
 
-lvm_use=$
+lvm_use=$(test -d "/etc/lvm" && echo "yes" || echo "no")
 
 tcp=$
 
