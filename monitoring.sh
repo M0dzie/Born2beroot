@@ -12,15 +12,16 @@
 
 architecture=$(uname -a)
 
-count_cpu=$(nproc --all)
+count_pcpu=$(grep "physical id" /proc/cpuinfo | wc -l)
+count_vcpu=$(grep "processor" /proc/cpuinfo | wc -l)
 
 mem_use=$(free --mega | grep "Mem" |  awk '{print $3}')
 mem_total=$(free --mega | grep "Mem" | awk '{print $2}')
 mem_prcnt=$(free --mega | grep "Mem" | awk '{printf("%.2f%%", $3/$2*100)}')
 
-disk_use=$(df -h --total | grep "total" | awk '{print $3}' | grep -oE '[0-9]+')
-disk_total=$(df -h --total | grep "total" | awk '{print $2}')
-disk_prcnt=$(df -h --total | grep "total" | awk '{print $5}')
+disk_use=$(df -Bm | grep "^/dev" | grep -v "/boot" | cut -d 'M' -f3 | awk '{result += $1} END {print result}')
+disk_total=$(df -Bg | grep "^/dev" | grep -v "/boot" | cut -d 'G' -f2 | awk '{result += $2} END {print result}')
+disk_prcnt=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} {total += $2} END {printf("%d%%", use/total*100)}')
 
 cpu_load=$
 
@@ -37,8 +38,8 @@ network=$
 sudo=$
 
 wall "	#Architecture: $architecture
-	#CPU Physical : $count_cpu
-	#vCPU : $count_cpu
+	#CPU Physical : $count_pcpu
+	#vCPU : $count_vcpu
 	#Memory Usage: $mem_use/${mem_total}MB ($mem_prcnt)
 	#Disk Usage: $disk_use/${disk_total}Gb ($disk_prcnt)
 	#CPU load: $cpu_load
