@@ -29,7 +29,7 @@ last_boot=$(who -b | awk '{print $3,$4}')
 
 lvm_use=$(test -d "/etc/lvm" && echo "yes" || echo "no")
 
-tcp=$
+tcp=$(ss | grep -c "tcp")
 
 usr_log=$
 
@@ -45,7 +45,7 @@ wall "	#Architecture: $architecture
 	#CPU load: $cpu_load
 	#Last boot: $last_boot
 	#LVM use: $lvm_use
-	#Connexions TCP : $tcp
+	#Connexions TCP : $tcp ESTABLISHED
 	#User log: $user_log
 	#Network: $network
 	#Sudo : $sudo"
