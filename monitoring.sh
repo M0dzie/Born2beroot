@@ -31,7 +31,7 @@ lvm_use=$(test -d "/etc/lvm" && echo "yes" || echo "no")
 
 tcp=$(ss | grep -c "tcp")
 
-usr_log=$
+usr_log=$(who | wc -l)
 
 network=$
 
@@ -46,6 +46,6 @@ wall "	#Architecture: $architecture
 	#Last boot: $last_boot
 	#LVM use: $lvm_use
 	#Connexions TCP : $tcp ESTABLISHED
-	#User log: $user_log
+	#User log: $usr_log
 	#Network: $network
 	#Sudo : $sudo"
