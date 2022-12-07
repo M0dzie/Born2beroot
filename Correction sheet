@@ -1,0 +1,122 @@
+# Born2beRoot questions
+This project consists of having you set up your first server by following specific rules.
+
+## [AppArmor](https://apparmor.net/) and [SELinux](https://www.redhat.com/en/topics/linux/what-is-selinux)
+
+### AppArmor
+AppArmor is an effective and easy-to-use Linux application security system. AppArmor proactively protects the operating system and applications from external or internal threats, even zero-day attacks, by enforcing good behavior and preventing both known and unknown application flaws from being exploited.
+
+### SELinux
+**Security-Enhanced Linux** (SELinux) is a security architecture for **Linux** that allows administrators to have more control over who can access the system.
+
+### MAC vs DAC
+SELinux is using MAC (Mandatory access control) like AppArmor while traditionally Linux  uses DAC (Discretionary access control):
+- With **DAC**, files and processes have owners. You can have the user own a file, a group own a file, or other, which can be anyone else. Users have the ability to change permissions on their own files.
+  *The root user has full access control with a DAC system. If you have root access, then you can access any other user’s files or do whatever you want on the system.*
+- But on **MAC** systems like SELinux, there is administratively set policy around access. Even if the DAC settings on your home directory are changed, an SELinux policy in place to prevent another user or process from accessing the directory will keep the system safe.
+  *SELinux policies let you be specific and cover a large number of processes. You can make changes with SELinux to limit access between users, files, directories, and more.*
+
+### Differences
+- SELinux is considered safer and better, ships on most non Debian distros and is the backend of choice for many distros. (SELinux is more invasive but as a result offers more security )
+- AppArmor is a SUSE and Ubuntu based security platform and is a bit older than SELinux
+- SELinux also reinvents the wheel to provide access to a more expressive set of policy choices, AppArmor was designed to be simple by extending the same administrative semantics used for DAC
+- AppArmor is trying to recreate DAC controls with MAC-level enforcement, AppArmor's set of operations is also considerably smaller than those available under most SELinux implementations.
+
+| Point of Comparison                | AppArmor                                                            | SELinux                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Access control**                 | Uses security profiles based on paths                               | Uses security policies based on file labels.                              |
+| **Availability**                   | Available for any distribution, but mainly used on SUSE and Ubuntu. | Available for any distribution but primarily used on RHEL/Fedora systems. |
+| **Difficulty to learn**            | A shorter learning curve, easier to set up and administer.          | More complex and less intuitive.                                          |
+| **Independent verification**       | Possible.                                                           | Not possible.                                                             |
+| **Requires complex configuration** | No.                                                                 | Yes.                                                                      |
+| **System performance impact**      | None, but the start-up time is longer.                              | None.                                                                     |
+| **Policy rules**                   | Lacks flexibility.                                                  | Flexible.                                                                 |
+| **Level of control**               | Medium.                                                             | High.                                                                     |
+
+## APT vs APTitude
+
+### APT
+**Apt** or **Advanced Packaging Tool** is a free and open source software which gracefully handles software installation and removal.
+**Apt** is whole command line with no GUI
+### APTitude
+**Aptitude** is front-end to advanced packaging tool which adds a user interface to the functionality, thus allowing a user to interactively search for a package and install or remove it.
+### [Differences](https://www.tecmint.com/difference-between-apt-and-aptitude/)
+
+#### **Aptitude** is vaster in functionality than **apt-get** and integrates functionalities of apt-get and its other variants including **apt-mark** and **apt-cache**.
+**1.** While **apt-get** handles all the package installation, up-gradation, system-upgradation, purging package, resolving dependencies etc., **Aptitude** handles lot more stuff than apt, including functionalities of **apt-mark** and **apt-cache** i.e. searching for a package in list of installed packages, marking a package to be automatically or manually installed, holding a package making it unavailable for up-gradation and so on.
+
+#### apt-get lacks UI, Aptitude has a text-only and interactive UI
+**2.** **Apt-get** being a lower level package manager is restricted only to command line, while Aptitude being a higher-level tool has a default text-only interactive interface along with option of command-line operation by entering required commands.
+
+#### Aptitude has a better package management than apt-get
+**3.** While removing any installed package, **Aptitude** will automatically remove unused packages, while **apt-get** would need user to explicitly specify this by either adding additional option of `‘—auto-remove’` or specifying `‘apt-get autoremove’`.
+
+**4.** To investigate further as to why certain action is getting blocked or why or why-not a certain action should be taken, Aptitude offers `'why'` and **‘why-not’** commands.
+
+#### No conflict resolution in apt-get.
+**5.** While **apt-get** would probably die-out in case of conflicting action regarding installation or removal of package with a message, **Aptitude** can suggest possible measures to remove that conflict.
+
+#### Overrall
+**Aptitude** is more noob friendly than **apt-get** as it handles some commands for you and has a TUI and GUI to make the user's life "*easier*"
+
+# Offense
+## Cheat
+Since there is an online tutorial, you should check some extra things to see if they blindly followed the tutorial or not. If you see any of these in the VM, you should be **very suspicious**:
+- extra packages installed:
+	- git
+	- wget
+	- zsh
+	  check with `sudo apt list --installed | grep pkg`
+- a group called **evaluating** `getent group evaluating`
+- missing `reject_username` for `passwd`  in `/etc/pam.d/common-password`
+- `usercheck=0` in the `passwd` config
+- a script that looks exactly like this:
+```bash
+#!/bin/bash
+
+wall $'#Architecture: ' `hostnamectl | grep "Operating System" | cut -d ' ' -f5- ` `awk -F: '/^model name/ {print $2}' /proc/cpuinfo | uniq | sed -e 's/^[ \t]*//'` `arch` \
+$'\n#CPU physical: '`cat /proc/cpuinfo | grep processor | wc -l` \
+$'\n#vCPU:  '`cat /proc/cpuinfo | grep processor | wc -l` \
+$'\n'`free -m | awk 'NR==2{printf "#Memory Usage: %s/%sMB (%.2f%%)", $3,$2,$3*100/$2 }'` \
+$'\n'`df -h | awk '$NR=="/"{printf "#Disk Usage: %d/%dGB (%s)", $3,$2,$5}'` \
+$'\n'`top -bn1 | grep load | awk '{printf "#CPU Load: %.2f\n", $(NF-2)}'` \
+$'\n#Last boot: ' `who -b | awk '{print $3" "$4" "$5}'` \
+$'\n#LVM use: ' `lsblk |grep lvm | awk '{if ($1) {print "yes";exit;} else {print "no"} }'` \
+$'\n#Connection TCP:' `netstat -an | grep ESTABLISHED |  wc -l` \
+$'\n#User log: ' `who | cut -d " " -f 1 | sort -u | wc -l` \
+$'\nNetwork: IP ' `hostname -I`"("`ip a | grep link/ether | awk '{print $2}'`")" \
+$'\n#Sudo:  ' `grep 'sudo ' /var/log/auth.log | wc -l`
+```
+-  they say SELinux has a **low adoption rate**
+- the VM is `12GB`
+- ask them how they added the **SSH rule in UFW**, if they say `ufw allow ssh` & `ufw allow 4242` it's wrong and they blindly followed the tutorial online
+- if they used the weird script above ask them what the Diskusage line does (`$NF=="/"`  prints every third line starting from the first line:)
+
+## Tests
+1. Check the signature `shasum /Users/user/VirtualBox\ VMs/debian/debian.vdi > signature_copy.txt`
+2. Packages installed: 
+	- **271** with the 4 basic pkgs
+	- **274** with vim
+3. New user's password:
+	- your username in straight or reverse order
+	- all lowercase
+	- only digit and uppercase less than 9 char
+4. Check if they use a graphic session: `ls /usr/bin/*session`
+    -> `/usr/bin/dbus-run-session`
+5. Check for the sudo log: `ls -l /var/log/sudo` 
+   Use sudo `sudo echo lol` and check again if timestamp changed
+6. UFW Status `sudo ufw status` & `sudo service ufw status`
+7. SSH Status `sudo service ssh status`
+8. OS `uname -v`
+9. Check groups `groups user`
+10. Check the crontab `crontab -l`
+11. Script:
+	- Check the shebang to be `#!/bin/bash` (if not, it's not developped in **bash**)
+	- Ask how they made new lines
+		  -> $
+	- What does the `\` at the end of a line means
+		  -> to tell the script the line is continuing on the next line
+	- if `df -h` is used, it will not work and should count as **zero** (`df -h` is for *human readable* and if you mix `MB` with `GB` with `TB` the count is wrong)
+	- In the case of multiple partition/disks of different sizes it would add `TB` with MB `which` would be wrong
+	  ![[Pasted image 20221202004012.png]]
+	  ![[Pasted image 20221202004022.png]]
