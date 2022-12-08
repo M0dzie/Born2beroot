@@ -37,9 +37,9 @@ tcp=$(ss | grep -c "tcp")
 usr_log=$(who | wc -l)
 
 IPv4=$(hostname -I)
-MAC=$()
+MAC=$(ip addr | grep "link/ether" | awk '{print $2}')
 
-sudo=$
+sudo=$(journalctl -q | grep -c "sudo")
 
 wall "	#Architecture: $architecture
 	#CPU Physical : $count_pcpu
@@ -51,5 +51,5 @@ wall "	#Architecture: $architecture
 	#LVM use: $lvm_use
 	#Connexions TCP : $tcp ESTABLISHED
 	#User log: $usr_log
-	#Network: $IPv4 ($MAC)
-	#Sudo : $sudo"
+	#Network: IP $IPv4 ($MAC)
+	#Sudo : $sudo cmd"
