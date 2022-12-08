@@ -39,7 +39,7 @@ usr_log=$(who | wc -l)
 IPv4=$(hostname -I)
 MAC=$(ip addr | grep "link/ether" | awk '{print $2}')
 
-sudo=$(journalctl -q | grep -c "sudo")
+sudo=$(journalctl -q | grep -c "COMMAND")
 
 wall "	#Architecture: $architecture
 	#CPU Physical : $count_pcpu
