@@ -10,10 +10,12 @@
 #                                                                              #
 # **************************************************************************** #
 
+#!/usr/bin/bash
+
 architecture=$(uname -a)
 
-count_pcpu=$(grep "physical id" /proc/cpuinfo | wc -l)
-count_vcpu=$(grep "processor" /proc/cpuinfo | wc -l)
+count_pcpu=$(grep -c "physical id" /proc/cpuinfo)
+count_vcpu=$(grep -c "processor" /proc/cpuinfo)
 
 mem_use=$(free --mega | grep "Mem" |  awk '{print $3}')
 mem_total=$(free --mega | grep "Mem" | awk '{print $2}')
@@ -27,13 +29,15 @@ cpu_load=$(top -bn1 | grep "^%Cpu" | awk '{printf("%.1f%%", $2+$4)}')
 
 last_boot=$(who -b | awk '{print $3,$4}')
 
-lvm_use=$(test -d "/etc/lvm" && echo "yes" || echo "no")
+lvm_count=$(lsblk | grep -c "LVM")
+lvm_use=$(if [[ $lvm_count -eq 0 ]]; then echo "no"; else echo "yes"; fi)
 
 tcp=$(ss | grep -c "tcp")
 
 usr_log=$(who | wc -l)
 
-network=$
+IPv4=$(hostname -I)
+MAC=$()
 
 sudo=$
 
@@ -47,5 +51,5 @@ wall "	#Architecture: $architecture
 	#LVM use: $lvm_use
 	#Connexions TCP : $tcp ESTABLISHED
 	#User log: $usr_log
-	#Network: $network
+	#Network: $IPv4 ($MAC)
 	#Sudo : $sudo"
