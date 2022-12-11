@@ -93,7 +93,7 @@ STRONG CONFIG FOR SUDO
 
 MONITORING SCRIPT
 	1. Create a script ![[monitoring.sh]]
-	2. Create a cronjob 'sudo crontab -eu sudo'
+	2. Create a cronjob 'sudo crontab -e'
 	3. Add the line to run every 10 minutes '*/10 * * * * /home/user/monitoring.sh'
 
 
