@@ -21,8 +21,8 @@ mem_use=$(free --mega | grep "Mem" |  awk '{print $3}')
 mem_total=$(free --mega | grep "Mem" | awk '{print $2}')
 mem_prcnt=$(free --mega | grep "Mem" | awk '{printf("%.2f%%", $3/$2*100)}')
 
-disk_use=$(df -Bm | grep "^/dev" | grep -v "/boot" | cut -d 'M' -f3 | awk '{use += $1} END {print use}')
-disk_total=$(df -Bg | grep "^/dev" | grep -v "/boot" | cut -d 'G' -f1 | awk '{total += $2} END {print total}')
+disk_use=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} END {print use}')
+disk_total=$(df -Bg | grep "^/dev" | grep -v "/boot" | awk '{total += $2} END {print total}')
 disk_prcnt=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} {total += $2} END {printf("%d%%", use/total*100)}')
 
 cpu_load=$(top -bn1 | grep "^%Cpu" | awk '{printf("%.1f%%", $2+$4)}')
