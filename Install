@@ -6,8 +6,9 @@ VIRTUAL BOX
 INIT VM
 	- Install / US / Fr / Keymap US EN
 	- Hostname : login42 + 42 [mdp root = F********1]
+	- Pas de network
 	- User account : Nom et prenom
-	- Username : prenom em min [mdp user = B*******!]
+	- Username : login42 [mdp user = F********1]
 
 PARTITIONNING DISK (MANUAL)
 	- Manual pour les Bonus, sinon guided LVM
