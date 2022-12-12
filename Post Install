@@ -98,6 +98,6 @@ MONITORING SCRIPT
 
 
 DEFENCE
-	- 'hostnamectl' and 'hostnamectl set-hostname'
+	- 'hostnamectl' and 'hostnamectl set-hostname login42'
 	- 'sudoedit /etc/hosts'
 	- Create a new user 'useradd' or 'adduser' (simpler and guided user creation)
