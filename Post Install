@@ -70,7 +70,7 @@ USER42 GROUP
  	3. Check your groups with 'groups' or 'groups user'
 
 EVALUATING USER SETUP
-	1. Create a new user 'sudo useradd -m test' ('-m' creates the home directory)
+	1. Create a new user 'sudo adduser test' | 'sudo useradd -m test' ('-m' creates the home directory)
 	2. Add it to the group 'sudo usermod -aG user42 test'
 	3. Add a password to the user 'sudo passwd test'
 	4. Check if the password rules apply 'sudo chage -l test'
