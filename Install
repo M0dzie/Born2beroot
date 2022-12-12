@@ -12,7 +12,7 @@ INIT VM
 
 PARTITIONNING DISK (MANUAL)
 	- Manual pour les Bonus, sinon guided LVM
-	- SCIS2 -> pri/log -> 500MB -> primary -> beginning -> mount = /boot -> bootable = on
+	- SCIS2 -> pri/log -> 525MB -> primary -> beginning -> mount = /boot -> bootable = on
 	- Create encrypted -> sda free
 	- Logical Volume Manager -> sda5 crypted -> create Group "LVMGroup" -> create logical volume
 			- Home : "home" -> 5.4GB
