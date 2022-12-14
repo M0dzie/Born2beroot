@@ -25,7 +25,7 @@ disk_use=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} END {print
 disk_total=$(df -Bg | grep "^/dev" | grep -v "/boot" | awk '{total += $2} END {print total}')
 disk_prcnt=$(df -Bm | grep "^/dev" | grep -v "/boot" | awk '{use += $3} {total += $2} END {printf("%d%%", use/total*100)}')
 
-cpu_load=$(top -bn1 | grep "^%Cpu" | awk '{printf("%.1f%%", $2+$4)}')
+cpu_load=$(uptime | grep "load" | awk '{printf("%.1f%%", $9*100)}')
 
 last_boot=$(who -b | awk '{print $3,$4}')
 
